@@ -11,7 +11,7 @@ body {
     height: 100vh; 
     overflow: hidden; /* Prevent scrollbars from showing */
     font-family: Arial, sans-serif;
-    background-color: #222; /* Example dark background */
+    background-color: black; /* Example dark background */
 }
 
 .dashboard-container {

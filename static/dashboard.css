@@ -11,7 +11,8 @@ body {
     height: 100vh; 
     overflow: hidden; /* Prevent scrollbars from showing */
     font-family: Arial, sans-serif;
-    background-color: black; /* Example dark background */
+    /* Background color set to solid black for maximum contrast */
+    background-color: #000; 
 }
 
 .dashboard-container {
@@ -24,6 +25,8 @@ body {
     /* Ensure the container takes up the full height */
     height: 100%; 
     padding: 0 10px; /* Small padding on the sides */
+    
+    /* Transition is NOT needed here as the position is static when not shuffling */
 }
 
 /*
@@ -43,11 +46,14 @@ body {
     align-items: center;
     
     /* Visual styles */
-    /* FIX: Changed border-radius from 15px to 50% to create an oval shape */
+    /* Oval Shape: Set border-radius to 50% */
     border-radius: 50%;
     transition: all 0.3s ease;
     text-align: center;
     box-sizing: border-box; /* Include padding/border in the element's total width/height */
+    
+    /* BURN-IN FIX 2: Apply filter to slowly rotate the hue of the box background. (1-hour cycle) */
+    animation: hue-shift-slow 3600s linear infinite; 
 }
 
 .status-box h2 {
@@ -55,6 +61,11 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.1;
+    
+    /* BURN-IN FIX 3 (NEW): Apply subtle animation to text luminance (60-second pulse) */
+    animation: text-pulse 60s infinite alternate; 
+    /* Add transition for text position from JS */
+    transition: transform 0.1s linear; 
 }
 
 /* Add some space between the boxes (alternative to justify-content) */
@@ -63,7 +74,7 @@ body {
 }
 
 /*
- * COLOR STYLES (Ensure these are correct)
+ * CORE COLOR AND UTILITY STYLES 
  */
 .status-green {
     background-color: #00A94C;
@@ -82,13 +93,16 @@ body {
     color: white;
 }
 .status-purple {
-    background-color: #4C00A9;
+    background-color: #8A2BE2; /* Blue Violet */
     color: white;
 }
 .status-transparent {
     background: transparent;
     color: transparent;
 }
+
+
+/* Calendar specific styles */
 .primary-free {
     background-color: #00A94C;
     color: white;
@@ -101,7 +115,7 @@ body {
     background-color: #D80731;
     color: white;
 }
-/* Calendar specific styles */
+
 .medical-free {
     /* No visible box or status when free */
     background: transparent;
@@ -114,15 +128,4 @@ body {
 .medical-go {
     background-color: #FFA500;
     color: white;
-}
-.medical-busy {
-    background-color: #D80731;
-    color: white;
-}
-
-/* Clickable effect for calendar boxes */
-.clickable:hover {
-    cursor: pointer;
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }

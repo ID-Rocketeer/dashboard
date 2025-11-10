@@ -3,6 +3,7 @@
 // --- CONFIGURATION ---
 const API_URL = '/api/status';
 const CALENDAR_REFRESH_URL = '/api/refresh_calendar';
+const BURN_IN_INTERVAL = 30000; // 30 seconds (30000 milliseconds)
 
 // --- SOCKETIO SETUP ---
 const socket = io(); 
@@ -61,6 +62,57 @@ function updateBoxDisplay(boxId, status, cssClass, textContent) {
     }
 }
 
+/**
+ * BURN-IN FIX: Randomly reorders the children of the dashboard container.
+ */
+function shuffleChildren() {
+    const container = document.querySelector('.dashboard-container');
+    if (!container) return;
+
+    // Convert HTMLCollection of children to an Array of status boxes
+    let boxesToShuffle = Array.from(container.children).filter(node => 
+        node.classList.contains('status-box')
+    );
+    
+    // Store the non-shuffled elements (like the hidden span)
+    let nonStatusNodes = Array.from(container.children).filter(node => 
+        !node.classList.contains('status-box')
+    );
+
+    // Fisher-Yates shuffle algorithm on the status boxes
+    for (let i = boxesToShuffle.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [boxesToShuffle[i], boxesToShuffle[j]] = [boxesToShuffle[j], boxesToShuffle[i]];
+    }
+
+    // Remove all current children from the container
+    container.innerHTML = ''; 
+
+    // Re-append the shuffled status boxes
+    boxesToShuffle.forEach(box => container.appendChild(box));
+    
+    // Re-append the non-status elements (like the hidden span) at the end
+    nonStatusNodes.forEach(node => container.appendChild(node));
+}
+
+/**
+ * BURN-IN FIX: Subtly shifts the text position within the box container.
+ */
+function randomizeTextPosition() {
+    const textElements = document.querySelectorAll('.status-box h2');
+    
+    // Shift range: -1px to +1px (a very subtle sub-pixel shift)
+    const maxOffset = 1; 
+    
+    textElements.forEach(text => {
+        // Generate random offsets
+        const offsetX = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
+        const offsetY = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
+
+        // Apply translation to the text element
+        text.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    });
+}
 
 /**
  * Fetches data from the server's cache API and updates the DOM.
@@ -68,11 +120,8 @@ function updateBoxDisplay(boxId, status, cssClass, textContent) {
 async function updateDashboard() {
     
     // 1. GET FALLBACKS (DRY Principle)
-    // Read the initial fallback names from the hidden HTML element rendered by Jinja.
     const fallbackElement = document.getElementById('eso-fallbacks');
     
-    // Initialize hoisted variables with the fallbacks read from the DOM.
-    // If the element fails to read (very unlikely), fall back to hardcoded defaults.
     let naDisplayName = fallbackElement ? fallbackElement.dataset.naDefault : 'PC-NA';
     let euDisplayName = fallbackElement ? fallbackElement.dataset.euDefault : 'PC-EU';
     
@@ -84,10 +133,12 @@ async function updateDashboard() {
         const response = await fetch(API_URL);
         const data = await response.json();
         
+        // Burn-in prevention on data fetch/update:
+        shuffleChildren();
+        randomizeTextPosition(); // Added on data update too
+        
         // 2. OVERWRITE HOISTED VARIABLES
-        // If the fetch is successful, use the actual configured names from the server payload.
         if (data.eso_config) {
-            // Use the configured name if available, otherwise keep the hoisted default
             naDisplayName = data.eso_config.NA_DISPLAY_NAME || naDisplayName;
             euDisplayName = data.eso_config.EU_DISPLAY_NAME || euDisplayName;
         }
@@ -99,23 +150,21 @@ async function updateDashboard() {
         
         // --- 4. Update ESO EU Status ---
         const euStatus = data.eso_status.EU || data.eso_status['PC EU'] || errorStatus;
-        console.log('EU Server Status Received:', euStatus); // Check what this prints!
         const euCssClass = getStatusClass(euStatus); 
         updateBoxDisplay('eu-box', euStatus, euCssClass, euDisplayName); 
         
-        // --- 5. Update ALL Calendar Statuses (Fix for display_text remains) ---
+        // --- 5. Update ALL Calendar Statuses ---
         const calendarStatuses = data.calendar_statuses || []; 
         
         calendarStatuses.forEach(cal => {
             const boxId = `${cal.id}-calendar-box`;
             
-            // FIX: Remove .toUpperCase() to correctly honor the configured display_text.
             // If display_text is empty ('') and cal.status is 'FREE', statusText will be 'FREE'.
             // To ensure medical-free remains invisible, we check the CSS class first.
             let statusText = String(cal.display_text || cal.status); 
             
             // If the CSS class indicates the hidden state, force the text to be empty.
-            if (cal.css_class === 'medical-free') {
+            if (cal.css_class === 'medical-free' || cal.css_class === 'status-transparent') {
                 statusText = '';
             }
             
@@ -125,7 +174,7 @@ async function updateDashboard() {
     } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
         
-        // 6. FALLBACK: Use the hoisted variables (which retain the safe fallback value)
+        // 6. FALLBACK: Use the hoisted variables 
         updateBoxDisplay('na-box', errorStatus, errorCssClass, naDisplayName);
         updateBoxDisplay('eu-box', errorStatus, errorCssClass, euDisplayName);
     }
@@ -175,4 +224,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Start Dashboard with initial load
     updateDashboard();
+
+    // BURN-IN FIX: Periodically trigger burn-in prevention functions every 30 seconds
+    setInterval(() => {
+        console.log('Client-side burn-in prevention running...');
+        randomizeTextPosition(); // NOW implemented
+        shuffleChildren();       // Already implemented
+    }, BURN_IN_INTERVAL);
 });

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        
+        <div id="na-box" class="status-box status-orange">
+            <h2 id="na-text">{{ cache.eso_config.NA_DISPLAY_NAME | default('PC-NA') }}</h2>
+        </div>
+        <div id="eu-box" class="status-box status-orange">
+            <h2 id="eu-text">{{ cache.eso_config.EU_DISPLAY_NAME | default('PC-EU') }}</h2>
+        </div>
+
+        {% for config in calendar_configs %}
+            {% set current_status = cache.calendar_statuses | selectattr('id', 'equalto', config.id) | first %}
+            
+            {% set status_word = current_status.status if current_status else 'N/A' %}
+            
+            {% set display_word = current_status.display_text if current_status and 'display_text' in current_status else status_word %}
+            
+            {% set css_class = current_status.css_class if current_status and 'css_class' in current_status else 'status-orange' %}
+            
+            {# FIX: If the status uses the 'medical-free' class, ensure the initial display text is an empty string #}
+            {% set final_display_word = '' if css_class == 'medical-free' else display_word %}
+            
+            <div id="{{ config.id }}-calendar-box" 
+                 class="status-box {{ css_class }} clickable calendar-box" 
+                 data-calendar-id="{{ config.id }}">
+                
+                <h2 id="{{ config.id }}-calendar-text">{{ final_display_word }}</h2>
+            </div>
+        {% endfor %}
+        
+    </div>
+
+    <span id="eso-fallbacks" style="display:none;" 
+        data-na-default="{{ cache.eso_config.NA_DISPLAY_NAME | default('PC-NA') }}"
+        data-eu-default="{{ cache.eso_config.EU_DISPLAY_NAME | default('PC-EU') }}">
+    </span>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script> 
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>

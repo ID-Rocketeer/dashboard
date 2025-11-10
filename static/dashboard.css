@@ -1,0 +1,128 @@
+/* dashboard.css */
+
+/*
+ * CORE LAYOUT STYLES (REQUIRED FOR HORIZONTAL ALIGNMENT AND RESIZING)
+ */
+body {
+    /* Remove default margins and padding */
+    margin: 0;
+    padding: 0;
+    /* Ensure body takes up the full viewport height */
+    height: 100vh; 
+    overflow: hidden; /* Prevent scrollbars from showing */
+    font-family: Arial, sans-serif;
+    background-color: #222; /* Example dark background */
+}
+
+.dashboard-container {
+    /* Use Flexbox to arrange items horizontally */
+    display: flex;
+    /* Distribute space evenly between and around the boxes */
+    justify-content: space-evenly; 
+    /* Vertically center the items within the container */
+    align-items: center; 
+    /* Ensure the container takes up the full height */
+    height: 100%; 
+    padding: 0 10px; /* Small padding on the sides */
+}
+
+/*
+ * STATUS BOX STYLES (REQUIRED FOR ASPECT RATIO AND FONT SIZING)
+ */
+.status-box {
+    /* CRITICAL: Allows boxes to grow/shrink equally and maintains responsiveness */
+    flex: 0 1 30%; /* Shorthand for flex-grow:0, flex-shrink:1, flex-basis:30% */
+    
+    /* Set height relative to the container for vertical resize */
+    height: 90%; 
+    max-width: 400px; /* Max width for large screens */
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    /* Visual styles */
+    /* FIX: Changed border-radius from 15px to 50% to create an oval shape */
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-sizing: border-box; /* Include padding/border in the element's total width/height */
+}
+
+.status-box h2 {
+    font-size: 5vw; /* Font size relative to viewport width */
+    margin: 0;
+    padding: 0;
+    line-height: 1.1;
+}
+
+/* Add some space between the boxes (alternative to justify-content) */
+.status-box + .status-box {
+    margin-left: 20px;
+}
+
+/*
+ * COLOR STYLES (Ensure these are correct)
+ */
+.status-green {
+    background-color: #00A94C;
+    color: white;
+}
+.status-red {
+    background-color: #D80731;
+    color: white;
+}
+.status-yellow {
+    background-color: #FFEB3B;
+    color: #000;
+}
+.status-orange {
+    background-color: #FFA500;
+    color: white;
+}
+.status-purple {
+    background-color: #4C00A9;
+    color: white;
+}
+.status-transparent {
+    background: transparent;
+    color: transparent;
+}
+.primary-free {
+    background-color: #00A94C;
+    color: white;
+}
+.primary-pending {
+    background-color: #FFA500;
+    color: white;
+}
+.primary-busy {
+    background-color: #D80731;
+    color: white;
+}
+/* Calendar specific styles */
+.medical-free {
+    /* No visible box or status when free */
+    background: transparent;
+    color: transparent;
+}
+.medical-ready {
+    background-color: #FFEB3B;
+    color: #000;
+}
+.medical-go {
+    background-color: #FFA500;
+    color: white;
+}
+.medical-busy {
+    background-color: #D80731;
+    color: white;
+}
+
+/* Clickable effect for calendar boxes */
+.clickable:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}

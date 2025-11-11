@@ -26,7 +26,8 @@ body {
     height: 100%; 
     padding: 0 10px; /* Small padding on the sides */
     
-    /* Transition is NOT needed here as the position is static when not shuffling */
+    /* BURN-IN FIX 5: Add transition for uniform vertical shifting */
+    transition: transform 0.3s ease-out;
 }
 
 /*
@@ -34,11 +35,16 @@ body {
  */
 .status-box {
     /* CRITICAL: Allows boxes to grow/shrink equally and maintains responsiveness */
-    flex: 0 1 30%; /* Shorthand for flex-grow:0, flex-shrink:1, flex-basis:30% */
+    flex: 0 1 25%; /* Set flex basis to optimize space on wide display */
     
-    /* Set height relative to the container for vertical resize */
-    height: 90%; 
-    max-width: 400px; /* Max width for large screens */
+    /* UPDATED: Reduced margin for a subtler gap between circles */
+    margin: 0 0.5%;
+    
+    /* NEW: Use aspect-ratio to force the height to match the width (creating a circle) */
+    aspect-ratio: 1 / 1; 
+    
+    /* Set max height relative to the viewport height to control size */
+    max-height: 90vh; 
     
     display: flex;
     flex-direction: column;
@@ -46,7 +52,7 @@ body {
     align-items: center;
     
     /* Visual styles */
-    /* Oval Shape: Set border-radius to 50% */
+    /* Circle Shape: Set border-radius to 50% */
     border-radius: 50%;
     transition: all 0.3s ease;
     text-align: center;
@@ -54,6 +60,9 @@ body {
     
     /* BURN-IN FIX 2: Apply filter to slowly rotate the hue of the box background. (1-hour cycle) */
     animation: hue-shift-slow 3600s linear infinite; 
+    
+    /* IMPORTANT: Remove box-specific vertical transition to prevent conflicts */
+    transition: all 0.3s ease; 
 }
 
 .status-box h2 {
@@ -62,70 +71,68 @@ body {
     padding: 0;
     line-height: 1.1;
     
-    /* BURN-IN FIX 3 (NEW): Apply subtle animation to text luminance (60-second pulse) */
+    /* BURN-IN FIX 3: Apply subtle animation to text luminance (60-second pulse) */
     animation: text-pulse 60s infinite alternate; 
     /* Add transition for text position from JS */
     transition: transform 0.1s linear; 
 }
 
-/* Add some space between the boxes (alternative to justify-content) */
-.status-box + .status-box {
-    margin-left: 20px;
-}
-
 /*
  * CORE COLOR AND UTILITY STYLES 
  */
-.status-green {
-    background-color: #00A94C;
-    color: white;
-}
 .status-red {
     background-color: #D80731;
+    color: white;
+}
+.status-orange {
+    background-color: #FFA500;
     color: white;
 }
 .status-yellow {
     background-color: #FFEB3B;
     color: #000;
 }
-.status-orange {
-    background-color: #FFA500;
+.status-green {
+    background-color: #00A94C;
+    color: white;
+}
+.status-blue {
+    background-color: #3107d8;
     color: white;
 }
 .status-purple {
-    background-color: #8A2BE2; /* Blue Violet */
+    background-color: #6c00a9;
     color: white;
 }
 .status-transparent {
     background: transparent;
     color: transparent;
 }
-
-
-/* Calendar specific styles */
-.primary-free {
-    background-color: #00A94C;
-    color: white;
-}
-.primary-pending {
-    background-color: #FFA500;
-    color: white;
-}
-.primary-busy {
-    background-color: #D80731;
-    color: white;
-}
-
-.medical-free {
-    /* No visible box or status when free */
-    background: transparent;
-    color: transparent;
-}
-.medical-ready {
-    background-color: #FFEB3B;
-    color: #000;
-}
 .medical-go {
-    background-color: #FFA500;
+    background-color: white;
+    color: #8F1917;
+}
+.medical-busy {
+    background-color: #8F1917;
     color: white;
+}
+
+/* Clickable effect for calendar boxes */
+.clickable:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* BURN-IN FIX 3: Keyframes for subtle text luminance pulse */
+@keyframes text-pulse {
+    0% { filter: brightness(1.0); }
+    50% { filter: brightness(0.95); } /* Subtle dimming */
+    100% { filter: brightness(1.0); }
+}
+
+/* BURN-IN FIX 2: Keyframes for the 1-hour continuous hue shift */
+@keyframes hue-shift-slow {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
 }

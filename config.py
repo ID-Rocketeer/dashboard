@@ -43,8 +43,8 @@ CALENDAR_CONFIGS = [
         'pending_minutes': 30, # The SHORT window (30 minutes)
         'prepare_minutes': 60, # The LONG window (60 minutes)
         'statuses': {
-            'FREE':    {'class': 'medical-free',  'text': ''},
-            'PREPARE': {'class': 'medical-ready', 'text': 'PREP'},
+            'FREE':    {'class': 'status-transparent',  'text': ''},
+            'PREPARE': {'class': 'status-blue', 'text': 'PREP'},
             'PENDING': {'class': 'medical-go',    'text': 'LEAVE'},
             'BUSY':    {'class': 'medical-busy',  'text': 'APT'},
             'ERROR':   {'class': 'status-orange', 'text': 'ERROR'},

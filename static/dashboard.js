@@ -115,13 +115,36 @@ function randomizeTextPosition() {
 }
 
 /**
+ * BURN-IN FIX: Shifts the entire container vertically for uniform movement.
+ * Uses the full range (±10%) to break up static vertical lines over time.
+ */
+function randomizeVerticalPosition() {
+    const container = document.querySelector('.dashboard-container');
+    if (!container) return;
+    
+    // Shift range: -10% to +10% of the container's height.
+    // Since the container is 100vh, this utilizes the maximum safe space.
+    const maxOffset = 10; 
+    
+    // Generate random offset for Y-axis
+    const offsetY = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
+
+    // Apply only vertical translation to the container element
+    container.style.transform = `translateY(${offsetY}%)`;
+}
+
+
+/**
  * Fetches data from the server's cache API and updates the DOM.
  */
 async function updateDashboard() {
     
     // 1. GET FALLBACKS (DRY Principle)
+    // Read the initial fallback names from the hidden HTML element rendered by Jinja.
     const fallbackElement = document.getElementById('eso-fallbacks');
     
+    // Initialize hoisted variables with the fallbacks read from the DOM.
+    // If the element fails to read (very unlikely), fall back to hardcoded defaults.
     let naDisplayName = fallbackElement ? fallbackElement.dataset.naDefault : 'PC-NA';
     let euDisplayName = fallbackElement ? fallbackElement.dataset.euDefault : 'PC-EU';
     
@@ -133,12 +156,15 @@ async function updateDashboard() {
         const response = await fetch(API_URL);
         const data = await response.json();
         
-        // Burn-in prevention on data fetch/update:
+        // BURN-IN FIXES: Apply randomization on data update
         shuffleChildren();
-        randomizeTextPosition(); // Added on data update too
+        randomizeTextPosition();
+        randomizeVerticalPosition();
         
         // 2. OVERWRITE HOISTED VARIABLES
+        // If the fetch is successful, use the actual configured names from the server payload.
         if (data.eso_config) {
+            // Use the configured name if available, otherwise keep the hoisted default
             naDisplayName = data.eso_config.NA_DISPLAY_NAME || naDisplayName;
             euDisplayName = data.eso_config.EU_DISPLAY_NAME || euDisplayName;
         }
@@ -150,20 +176,18 @@ async function updateDashboard() {
         
         // --- 4. Update ESO EU Status ---
         const euStatus = data.eso_status.EU || data.eso_status['PC EU'] || errorStatus;
+        console.log('EU Server Status Received:', euStatus); // Check what this prints!
         const euCssClass = getStatusClass(euStatus); 
         updateBoxDisplay('eu-box', euStatus, euCssClass, euDisplayName); 
         
-        // --- 5. Update ALL Calendar Statuses ---
+        // --- 5. Update ALL Calendar Statuses (Fix for display_text remains) ---
         const calendarStatuses = data.calendar_statuses || []; 
         
         calendarStatuses.forEach(cal => {
             const boxId = `${cal.id}-calendar-box`;
             
-            // If display_text is empty ('') and cal.status is 'FREE', statusText will be 'FREE'.
-            // To ensure medical-free remains invisible, we check the CSS class first.
-            let statusText = String(cal.display_text || cal.status); 
-            
-            // If the CSS class indicates the hidden state, force the text to be empty.
+            // To ensure medical-free remains invisible, we check the CSS class.
+            let statusText = String(cal.display_text || cal.status).toUpperCase(); 
             if (cal.css_class === 'medical-free' || cal.css_class === 'status-transparent') {
                 statusText = '';
             }
@@ -174,7 +198,7 @@ async function updateDashboard() {
     } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
         
-        // 6. FALLBACK: Use the hoisted variables 
+        // 6. FALLBACK: Use the hoisted variables (which retain the safe fallback value)
         updateBoxDisplay('na-box', errorStatus, errorCssClass, naDisplayName);
         updateBoxDisplay('eu-box', errorStatus, errorCssClass, euDisplayName);
     }
@@ -228,7 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // BURN-IN FIX: Periodically trigger burn-in prevention functions every 30 seconds
     setInterval(() => {
         console.log('Client-side burn-in prevention running...');
-        randomizeTextPosition(); // NOW implemented
-        shuffleChildren();       // Already implemented
+        randomizeTextPosition(); 
+        shuffleChildren();       
+        randomizeVerticalPosition(); // NEW: Uniform vertical shift
     }, BURN_IN_INTERVAL);
 });

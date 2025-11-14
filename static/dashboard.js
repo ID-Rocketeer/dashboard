@@ -115,22 +115,29 @@ function randomizeTextPosition() {
 }
 
 /**
- * BURN-IN FIX: Shifts the entire container vertically for uniform movement.
- * Uses the full range (±10%) to break up static vertical lines over time.
+ * BURN-IN FIX: Shifts the entire container either vertically (Landscape) or 
+ * horizontally (Portrait) for anti-burn-in uniform movement.
  */
-function randomizeVerticalPosition() {
+function randomizeBurnInPosition() {
     const container = document.querySelector('.dashboard-container');
     if (!container) return;
     
-    // Shift range: -10% to +10% of the container's height.
-    // Since the container is 100vh, this utilizes the maximum safe space.
+    // Check orientation: Landscape (width > height) or Portrait (height >= width)
+    const isLandscape = window.innerWidth > window.innerHeight;
+    
+    // Shift range: -10% to +10% of the container's height/width.
     const maxOffset = 10; 
     
-    // Generate random offset for Y-axis
-    const offsetY = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
+    // Generate random offset
+    const offset = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
 
-    // Apply only vertical translation to the container element
-    container.style.transform = `translateY(${offsetY}%)`;
+    if (isLandscape) {
+        // Landscape Mode: Shift Vertically (Y-axis)
+        container.style.transform = `translateY(${offset}%)`;
+    } else {
+        // Portrait Mode: Shift Horizontally (X-axis)
+        container.style.transform = `translateX(${offset}%)`;
+    }
 }
 
 
@@ -159,7 +166,7 @@ async function updateDashboard() {
         // BURN-IN FIXES: Apply randomization on data update
         shuffleChildren();
         randomizeTextPosition();
-        randomizeVerticalPosition();
+        randomizeBurnInPosition();
         
         // 2. OVERWRITE HOISTED VARIABLES
         // If the fetch is successful, use the actual configured names from the server payload.
@@ -298,6 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Client-side burn-in prevention running...');
         randomizeTextPosition(); 
         shuffleChildren();       
-        randomizeVerticalPosition(); // NEW: Uniform vertical shift
+        randomizeBurnInPosition();
     }, BURN_IN_INTERVAL);
 });

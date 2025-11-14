@@ -32,6 +32,7 @@ body {
 
 /*
  * STATUS BOX STYLES (REQUIRED FOR ASPECT RATIO AND FONT SIZING)
+ * These styles primarily govern Landscape mode and box fundamentals.
  */
 .status-box {
     /* CRITICAL: Allows boxes to grow/shrink equally and maintains responsiveness */
@@ -45,6 +46,9 @@ body {
     
     /* Set max height relative to the viewport height to control size */
     max-height: 90vh; 
+    
+    /* LANDSCAPE FIX: Prevent content from forcing the box to expand beyond its flex allocation */
+    overflow: hidden; 
     
     display: flex;
     flex-direction: column;
@@ -70,6 +74,16 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.1;
+    
+    /* LANDSCAPE FIX: Force text onto one line and clip/show ellipsis if content overflows */
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis; 
+
+    /* CRITICAL FIX: To force right-side clipping in Landscape, align text left 
+       and rely on the parent's centering to place the block correctly. */
+    text-align: left; 
+    max-width: 90%; /* Slight constraint to ensure padding, but allows text to grow */
     
     /* BURN-IN FIX 3: Apply subtle animation to text luminance (60-second pulse) */
     animation: text-pulse 60s infinite alternate; 
@@ -137,27 +151,49 @@ body {
     100% { filter: hue-rotate(360deg); }
 }
 
-/* --- Fullscreen Button Styles --- */
-#fullscreen-button {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    padding: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    cursor: pointer;
-    opacity: 0.3;
-    transition: opacity 0.2s ease;
-    z-index: 1000;
-}
+/* --- RESPONSIVENESS: Vertical Layout for Portrait/Taller Screens (FINAL WORKING BLOCK) --- */
+@media screen and (orientation: portrait) {
+    .dashboard-container {
+        /* Layout and spacing */
+        flex-direction: column;
+        justify-content: space-evenly; 
+        align-items: center; 
+        height: 100vh;
+        padding: 5px 0;
+    }
 
-#fullscreen-button:hover {
-    opacity: 1;
-}
+    .status-box {
+        /* FIX: Reduced height to 15vh for anti-clipping during vertical shift */
+        height: 15vh; 
+        /* Constrain width by the new height (15vh) to guarantee a circle shape */
+        width: min(90vw, 15vh); 
+        
+        padding-top: 0; 
+        /* FIX: Minimal margin for anti-clipping */
+        margin: 1vh 0; 
+        
+        flex: 0 0 auto;
+        
+        /* Centering text inside the box */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-#fullscreen-button svg {
-    width: 24px;
-    height: 24px;
-    stroke: #ffffff; /* White icon color */
-    display: block; /* Ensures the hidden/shown SVGs stack correctly */
+    .status-box h2 {
+        /* Final working font size for 5-character labels (ERROR/LEAVE) */
+        font-size: 3.8vh; 
+        
+        /* Max-width constraint that provides proper padding */
+        max-width: 14vh; 
+        
+        /* Ensure text stays on one line and use ellipsis for long text labels */
+        white-space: nowrap; 
+        overflow: hidden; 
+        text-overflow: ellipsis; 
+
+        /* Override positioning */
+        position: static; 
+        transform: none;
+    }
 }

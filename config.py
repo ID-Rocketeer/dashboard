@@ -18,7 +18,7 @@ CALENDAR_CONFIGS = [
         'name': 'Primary Calendar',
         'pending_minutes': 15,
         'statuses': {
-            'FREE':    {'class': 'status-green',  'text': 'FREE'},
+            'FREE':    {'class': 'status-green',  'text': 'DASH'},
             'PENDING': {'class': 'status-yellow', 'text': 'SOON'},
             'BUSY':    {'class': 'status-red',    'text': 'BUSY'},
             'ERROR':   {'class': 'status-orange', 'text': 'ERROR'},

@@ -136,3 +136,28 @@ body {
     0% { filter: hue-rotate(0deg); }
     100% { filter: hue-rotate(360deg); }
 }
+
+/* --- Fullscreen Button Styles --- */
+#fullscreen-button {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+}
+
+#fullscreen-button:hover {
+    opacity: 1;
+}
+
+#fullscreen-button svg {
+    width: 24px;
+    height: 24px;
+    stroke: #ffffff; /* White icon color */
+    display: block; /* Ensures the hidden/shown SVGs stack correctly */
+}

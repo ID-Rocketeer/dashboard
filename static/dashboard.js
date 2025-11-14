@@ -205,6 +205,39 @@ async function updateDashboard() {
 }
 
 /**
+ * ADD THIS FUNCTION
+ * Toggles fullscreen mode for the entire document.
+ */
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen()
+            .catch(err => console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`));
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+/**
+ * ADD THIS FUNCTION
+ * Updates the fullscreen icon visibility based on the current state.
+ */
+function updateFullscreenIcons() {
+    const enterIcon = document.getElementById('fs-icon-enter');
+    const exitIcon = document.getElementById('fs-icon-exit');
+    if (!enterIcon || !exitIcon) return;
+
+    if (document.fullscreenElement) {
+        enterIcon.style.display = 'none';
+        exitIcon.style.display = 'block';
+    } else {
+        enterIcon.style.display = 'block';
+        exitIcon.style.display = 'none';
+    }
+}
+
+/**
  * Handles the click event to manually refresh the Calendar status.
  */
 async function handleCalendarRefresh(event) {
@@ -245,7 +278,18 @@ document.addEventListener('DOMContentLoaded', () => {
     calendarBoxes.forEach(box => {
         box.addEventListener('click', handleCalendarRefresh);
     });
-    
+ 
+    // --- ADD THESE LINES FOR FULLSCREEN ---
+    const fsButton = document.getElementById('fullscreen-button');
+    if (fsButton) {
+        fsButton.addEventListener('click', toggleFullScreen);
+    }
+    // Listen for changes to fullscreen state (e.g., user pressing ESC)
+    document.addEventListener('fullscreenchange', updateFullscreenIcons);
+    // Set initial icon state on load
+    updateFullscreenIcons();
+    // --- END OF ADDED LINES --- 
+
     // Start Dashboard with initial load
     updateDashboard();
 

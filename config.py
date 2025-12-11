@@ -2,19 +2,19 @@
 
 # --- POLLING INTERVALS ---
 
-ESO_POLL_INTERVAL = 60 
-CALENDAR_MIN_REFRESH_INTERVAL = 30 
-CALENDAR_MAX_FETCH_INTERVAL_SECONDS = 12 * 3600 # 12 hours
+ESO_POLL_INTERVAL = 60
+CALENDAR_MIN_REFRESH_INTERVAL = 30
+CALENDAR_MAX_FETCH_INTERVAL_SECONDS = 12 * 3600  # 12 hours
 
 
 # --- GOOGLE CALENDAR CONFIGURATION ---
 
-# List of calendar IDs to check. 
+# List of calendar IDs to check.
 # STATUSES dictionary now groups class and text for each state.
 CALENDAR_CONFIGS = [
     {
         'id': 'primary',
-        'calendar_id': 'primary', 
+        'calendar_id': 'primary',
         'name': 'Primary Calendar',
         'pending_minutes': 15,
         'statuses': {
@@ -38,10 +38,10 @@ CALENDAR_CONFIGS = [
     },
     {
         'id': 'medical',
-        'calendar_id': 'fhu26gklo4t5jonio3sv9o1i18@group.calendar.google.com', 
+        'calendar_id': 'fhu26gklo4t5jonio3sv9o1i18@group.calendar.google.com',
         'name': 'Medical Appointments',
-        'pending_minutes': 30, # The SHORT window (30 minutes)
-        'prepare_minutes': 60, # The LONG window (60 minutes)
+        'pending_minutes': 30,  # The SHORT window (30 minutes)
+        'prepare_minutes': 60,  # The LONG window (60 minutes)
         'statuses': {
             'FREE':    {'class': 'status-transparent',  'text': ''},
             'PREPARE': {'class': 'status-blue', 'text': 'PREP'},
@@ -60,8 +60,9 @@ ESO_CONFIG = {
     'EU_DISPLAY_NAME': 'PC-EU',
 }
 
-# Timezone for the server's event analysis (UTC is recommended for server operations)
-TIMEZONE = "UTC" 
+# Timezone for the server's event analysis
+# (UTC is recommended for server operations)
+TIMEZONE = "UTC"
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']

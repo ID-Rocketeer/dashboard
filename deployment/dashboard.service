@@ -1,0 +1,15 @@
+[Unit]
+Description=Personal Dashboard Server
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/dashboard_project
+Environment="PATH=/home/pi/dashboard_project/venv/bin"
+ExecStart=/home/pi/dashboard_project/venv/bin/python /home/pi/dashboard_project/dashboard_server.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

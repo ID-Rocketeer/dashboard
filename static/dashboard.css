@@ -25,8 +25,8 @@ body {
     align-items: center;
     /* Ensure the container takes up the full height */
     height: 100%;
-    padding: 0 10px;
-    /* Small padding on the sides */
+    /* Removed fixed padding to utilize full viewport width for calculation accuracy */
+    padding: 0;
 
     /* BURN-IN FIX 5: Add transition for uniform vertical shifting */
     transition: transform 0.3s ease-out;
@@ -38,7 +38,8 @@ body {
  */
 .status-box {
     /* CRITICAL: Allows boxes to grow/shrink equally and maintains responsiveness */
-    flex: 0 1 25%;
+    /* UPDATED: Disable shrinking (0 0) to enforce strict circular shape based on JS calculation */
+    flex: 0 0 var(--dynamic-circle-size, 25%);
     /* Set flex basis to optimize space on wide display */
 
     /* UPDATED: Reduced margin for a subtler gap between circles */
@@ -47,8 +48,8 @@ body {
     /* NEW: Use aspect-ratio to force the height to match the width (creating a circle) */
     aspect-ratio: 1 / 1;
 
-    /* Set max height relative to the viewport height to control size */
-    max-height: 90vh;
+    /* REMOVED: max-height constraint. JS calculation 'shortDimension * 0.80' provides safety.
+       CSS max-height can cause aspect ratio distortion (ovals) if it clamps only one axis. */
 
     /* LANDSCAPE FIX: Prevent content from forcing the box to expand beyond its flex allocation */
     overflow: hidden;
@@ -57,6 +58,9 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    /* CRITICAL FIX: Ensure individual boxes don't drift vertically due to Flexbox baseline/stretch defaults */
+    align-self: center;
 
     /* Visual styles */
     /* Circle Shape: Set border-radius to 50% */
@@ -71,10 +75,15 @@ body {
 
     /* IMPORTANT: Remove box-specific vertical transition to prevent conflicts */
     transition: all 0.3s ease;
+
+    /* DYNAMIC SIZING OVERRIDE: If JS has calculated a size, use it. */
+    width: var(--dynamic-circle-size, auto);
+    height: var(--dynamic-circle-size, auto);
+    /* If dynamic size is set, flex-basis should be auto to allow explicit width to take over */
 }
 
 .status-box h2 {
-    font-size: 5vw;
+    font-size: var(--dynamic-font-size, 5vw);
     /* Font size relative to viewport width */
     margin: 0;
     padding: 0;
@@ -193,10 +202,9 @@ body {
     }
 
     .status-box {
-        /* CRITICAL FIX: Optimal box height that fits well in the constrained space */
-        height: 15vh;
-        /* Constrain width by the new height (15vh) to guarantee a circle shape */
-        width: min(90vw, 15vh);
+        /* Dynamic size handles metrics, just ensure margin is appropriate for vertical stacking */
+        width: var(--dynamic-circle-size, min(90vw, 15vh));
+        height: var(--dynamic-circle-size, 15vh);
 
         padding-top: 0;
         /* FIX: Minimal margin for tight spacing between boxes (vertical padding handles top/bottom) */
@@ -211,11 +219,11 @@ body {
     }
 
     .status-box h2 {
-        /* Adjusted font size for 5-character labels in the 15vh box */
-        font-size: 3.8vh;
+        /* Dynamic font size handles metrics */
+        font-size: var(--dynamic-font-size, 3.8vh);
 
         /* Max-width constraint that provides proper padding */
-        max-width: 13.5vh;
+        max-width: 90%;
 
         /* CRITICAL CLIPPING FIX: Explicitly set text-align: left for consistent right-side clipping */
         text-align: left;
@@ -224,9 +232,5 @@ body {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-
-        /* Override positioning */
-        position: static;
-        transform: none;
     }
 }

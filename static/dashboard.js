@@ -180,6 +180,11 @@ function updateCircleSizing() {
     const container = document.querySelector('.dashboard-container');
     if (container) {
         container.style.transform = 'none';
+
+        // CRITICAL FIX: Enforce the container to match the JS-calculated viewport exactly
+        // This prevents the "Unused space" issue where CSS 100vh > innerHeight.
+        container.style.height = `${viewportHeight}px`;
+        container.style.width = `${viewportWidth}px`; // Explicit width too
     }
 
     console.log(`Sizing update: ${isPortrait ? 'Portrait' : 'Landscape'}. ` +

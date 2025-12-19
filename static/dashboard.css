@@ -234,3 +234,29 @@ body {
         text-overflow: ellipsis;
     }
 }
+
+/* 
+ * FULLSCREEN TRIGGER AREA
+ * An invisible, rectangular hotspot in the bottom-right corner.
+ * Sized in vmin to scale with the display while staying within the 
+ * circle-sizing safety margins (12.5% of short axis) to prevent overlap.
+ */
+#fullscreen-button {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 2000;
+    /* 12vmin ensures it stays in the 'safe corner' for most aspect ratios */
+    width: 12vmin;
+    height: 12vmin;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#fullscreen-button svg {
+    display: none;
+    /* Icon removed as per requirements */
+}

@@ -424,4 +424,29 @@ document.addEventListener('DOMContentLoaded', () => {
         shuffleChildren();
         randomizeBurnInPosition();
     }, BURN_IN_INTERVAL);
+
+    // --- CURSOR HIDING LOGIC ---
+    let cursorTimer;
+    const hideDelay = 200; // 0.2 seconds
+
+    function hideCursor() {
+        document.body.classList.add('hide-cursor');
+    }
+
+    function showCursor() {
+        if (document.body.classList.contains('hide-cursor')) {
+            document.body.classList.remove('hide-cursor');
+        }
+        clearTimeout(cursorTimer);
+        cursorTimer = setTimeout(hideCursor, hideDelay);
+    }
+
+    // Show cursor on interaction and reset the timer
+    document.addEventListener('mousemove', showCursor);
+    document.addEventListener('mousedown', showCursor);
+    document.addEventListener('keydown', showCursor);
+    document.addEventListener('touchstart', showCursor);
+
+    // Initial start of the timer
+    cursorTimer = setTimeout(hideCursor, hideDelay);
 });

@@ -16,6 +16,11 @@ body {
     background-color: #000;
 }
 
+body.hide-cursor,
+body.hide-cursor * {
+    cursor: none !important;
+}
+
 .dashboard-container {
     /* Use Flexbox to arrange items horizontally */
     display: flex;

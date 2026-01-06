@@ -5,6 +5,9 @@ const API_URL = '/api/status';
 const CALENDAR_REFRESH_URL = '/api/refresh_calendar';
 const BURN_IN_INTERVAL = 30000; // 30 seconds (30000 milliseconds)
 
+// --- GLOBAL STATE ---
+let possibleTexts = []; // Stores all possible status strings for font scaling
+
 // --- SOCKETIO SETUP ---
 const socket = io();
 
@@ -96,20 +99,18 @@ function shuffleChildren() {
 }
 
 /**
- * BURN-IN FIX: Subtly shifts the text position within the box container.
+ * BURN-IN FIX: Subtly shifts the text position UNIFORMLY across all boxes.
+ * We make it uniform to maintain a professional, aligned look.
  */
 function randomizeTextPosition() {
     const textElements = document.querySelectorAll('.status-box h2');
-
-    // Shift range: -1px to +1px (a very subtle sub-pixel shift)
     const maxOffset = 1;
 
-    textElements.forEach(text => {
-        // Generate random offsets
-        const offsetX = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
-        const offsetY = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
+    // Generate ONE set of offsets for ALL boxes to keep them aligned
+    const offsetX = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
+    const offsetY = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
 
-        // Apply translation to the text element
+    textElements.forEach(text => {
         text.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
     });
 }
@@ -151,6 +152,45 @@ function updateCircleSizing() {
     // The optimal size is the smaller of the two constraints
     const circleSize = Math.min(maxSizeStacking, maxSizeCrossAxis);
 
+    // --- DYNAMIC FONT SCALING ---
+    // Start with a base font size (~28% of circle size)
+    let fontSize = circleSize * 0.28;
+
+    // --- BIDIRECTIONAL DUAL-AXIS SCALING ---
+    // Identify words to measure (master list or currently visible)
+    let textsToMeasure = [...possibleTexts];
+    if (textsToMeasure.length === 0) {
+        textsToMeasure = Array.from(document.querySelectorAll('.status-box h2'))
+            .map(el => el.textContent.trim())
+            .filter(t => t);
+    }
+
+    if (textsToMeasure.length > 0) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const measurementBaseSize = 100;
+        context.font = `bold ${measurementBaseSize}px Arial, sans-serif`;
+
+        let maxBoxWidth = 0;
+        let maxBoxHeight = 0;
+
+        textsToMeasure.forEach(text => {
+            const metrics = context.measureText(text);
+            const w = metrics.width;
+            const h = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+            if (w > maxBoxWidth) maxBoxWidth = w;
+            if (h > maxBoxHeight) maxBoxHeight = h;
+        });
+
+        const targetSize = circleSize * 0.85; // 85% threshold leaves 7.5% margin on top and bottom
+        const fontSizeForWidth = maxBoxWidth > 0 ? (targetSize / maxBoxWidth) * measurementBaseSize : 100;
+        const fontSizeForHeight = maxBoxHeight > 0 ? (targetSize / maxBoxHeight) * measurementBaseSize : 100;
+
+        fontSize = Math.min(fontSizeForWidth, fontSizeForHeight);
+
+        console.log(`Scaling: Constrained by ${fontSizeForWidth < fontSizeForHeight ? 'width' : 'height'}. Threshold: 85%. Final font-size: ${fontSize.toFixed(1)}px`);
+    }
+
     // INTELLIGENT BURN-IN AXIS SELECTION:
     // We should shift in the direction that has MORE free space to avoid clipping.
     // If maxSizeStacking < maxSizeCrossAxis, the Main Axis (Stacking) is the bottleneck. Shift Cross-Axis.
@@ -169,14 +209,13 @@ function updateCircleSizing() {
         window.burnInShiftAxis = mainAxisTight ? 'y' : 'x';
     }
 
-    // Font is ~28% of circle size
-    const fontSize = circleSize * 0.28;
+    // Font is ~28% of circle size (already calculated and potentially scaled above)
 
     // Set CSS custom properties acting as a global override
     document.documentElement.style.setProperty('--dynamic-circle-size', `${circleSize}px`);
     document.documentElement.style.setProperty('--dynamic-font-size', `${fontSize}px`);
 
-    // RESET TRANSFORM to avoid sticky shifts when sizing changes
+    // RESET ALL TRANSFORMS to avoid sticky offsets
     const container = document.querySelector('.dashboard-container');
     if (container) {
         container.style.transform = 'none';
@@ -186,12 +225,11 @@ function updateCircleSizing() {
         container.style.height = `${viewportHeight}px`;
         container.style.width = `${viewportWidth}px`; // Explicit width too
     }
+    document.querySelectorAll('.status-box h2').forEach(text => {
+        text.style.transform = 'none';
+    });
 
-    console.log(`Sizing update: ${isPortrait ? 'Portrait' : 'Landscape'}. ` +
-        `Limits: Stack=${maxSizeStacking.toFixed(1)}, Cross=${maxSizeCrossAxis.toFixed(1)}. ` +
-        `Bottleneck: ${mainAxisTight ? 'Main' : 'Cross'}. ` +
-        `Safe Shift Axis: ${window.burnInShiftAxis.toUpperCase()}. ` +
-        `Final Size: ${circleSize.toFixed(1)}px`);
+    console.log(`Sizing update: ${isPortrait ? 'Portrait' : 'Landscape'}. Size: ${circleSize.toFixed(1)}px`);
 }
 
 /**
@@ -271,6 +309,11 @@ async function updateDashboard() {
     try {
         const response = await fetch(API_URL);
         const data = await response.json();
+
+        // Store possible texts for font scaling calculations
+        if (data.all_possible_texts) {
+            possibleTexts = data.all_possible_texts;
+        }
 
         // BURN-IN FIXES: Apply randomization on data update
         shuffleChildren();

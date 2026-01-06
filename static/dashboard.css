@@ -89,21 +89,21 @@ body.hide-cursor * {
 
 .status-box h2 {
     font-size: var(--dynamic-font-size, 5vw);
-    /* Font size relative to viewport width */
     margin: 0;
     padding: 0;
-    line-height: 1.1;
+    line-height: normal;
 
-    /* LANDSCAPE FIX: Force text onto one line and clip/show ellipsis if content overflows */
+    /* Use Flexbox for perfect centering (bypasses baseline offsets) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+
+    /* LANDSCAPE FIX: Keep whitespace nowrap for scaling logic to work correctly */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    /* CRITICAL FIX: To force right-side clipping in Landscape, align text left 
-       and rely on the parent's centering to place the block correctly. */
-    text-align: left;
-    /* Max-width is set high (90%) to prevent clipping of non-overflowing text */
-    max-width: 90%;
 
     /* BURN-IN FIX 3: Apply subtle animation to text luminance (60-second pulse) */
     animation: text-pulse 60s infinite alternate;
@@ -226,12 +226,17 @@ body.hide-cursor * {
     .status-box h2 {
         /* Dynamic font size handles metrics */
         font-size: var(--dynamic-font-size, 3.8vh);
-
-        /* Max-width constraint that provides proper padding */
-        max-width: 90%;
-
-        /* CRITICAL CLIPPING FIX: Explicitly set text-align: left for consistent right-side clipping */
-        text-align: left;
+        
+        /* Centering already handled by base h2 style (Flexbox) */
+        margin: 0;
+        padding: 0;
+        line-height: normal;
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
 
         /* Ensure text stays on one line and use ellipsis for long text labels */
         white-space: nowrap;

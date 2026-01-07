@@ -381,6 +381,12 @@ async function handleCalendarRefresh(event) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Detect 'dasher' hostname to apply themed backgrounds
+    const hostname = window.location.hostname;
+    if (hostname === 'dasher' || hostname === 'dasher.local') {
+        document.body.classList.add('theme-dasher');
+    }
+
     const naBox = document.getElementById('na-box');
     if (naBox) { naBox.style.cursor = 'default'; }
 

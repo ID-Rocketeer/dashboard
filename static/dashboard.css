@@ -9,6 +9,25 @@ body {
     background-color: #000;
 }
 
+/* Dasher-specific themed backgrounds */
+body.theme-dasher {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+@media screen and (orientation: landscape) {
+    body.theme-dasher {
+        background-image: url('dasher-horizontal.svg');
+    }
+}
+
+@media screen and (orientation: portrait) {
+    body.theme-dasher {
+        background-image: url('dasher-vertical.svg');
+    }
+}
+
 body.hide-cursor,
 body.hide-cursor * {
     cursor: none !important;

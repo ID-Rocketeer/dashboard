@@ -1,0 +1,10 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<svg xmlns="http://www.w3.org/2000/svg" width="4700" height="1024" viewBox="0 0 4700 1024">
+  <!-- Absolute black background -->
+  <rect width="100%" height="100%" fill="#000000"></rect>
+
+  <!-- Real text, readable, minimal optical padding -->
+  <text x="50%" y="50%" fill="rgb(12,12,12)" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="960" text-anchor="middle" dominant-baseline="central" textLength="4400" lengthAdjust="spacingAndGlyphs" style="user-select:text;">
+    DASHER
+  </text>
+</svg>

@@ -26,7 +26,6 @@
             
             {% set css_class = current_status.css_class if current_status and 'css_class' in current_status else 'status-orange' %}
             
-            {# FIX: If the status uses the 'medical-free' class, ensure the initial display text is an empty string #}
             {% set final_display_word = '' if css_class == 'medical-free' else display_word %}
             
             <div id="{{ config.id }}-calendar-box" 

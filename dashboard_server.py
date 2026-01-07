@@ -65,9 +65,9 @@ def update_eso_status_in_background():
 
 def calendar_poller_in_background():
     """
-    NEW: Dedicated thread to schedule calendar updates based on event
+    Dedicated thread to schedule calendar updates based on event
     transitions.
-    This eliminates the dependency on the ESO 60-second poll interval.
+    Eliminates the dependency on the ESO 60-second poll interval.
     Uses a threading Event to wake up immediately on manual refresh.
     """
     MIN_SLEEP = 1  # Check every second for transitions
@@ -254,7 +254,6 @@ if __name__ == '__main__':
     eso_thread.start()
 
     # 2. START THE BACKGROUND POLLER THREAD for CALENDAR
-    # (NEW: event-driven updates)
     calendar_thread = threading.Thread(
         target=calendar_poller_in_background, daemon=True)
     calendar_thread.start()

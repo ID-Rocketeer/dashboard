@@ -65,9 +65,9 @@ def update_eso_status_in_background():
 
 def calendar_poller_in_background():
     """
-    NEW: Dedicated thread to schedule calendar updates based on event
+    Dedicated thread to schedule calendar updates based on event
     transitions.
-    This eliminates the dependency on the ESO 60-second poll interval.
+    Eliminates the dependency on the ESO 60-second poll interval.
     Uses a threading Event to wake up immediately on manual refresh.
     """
     MIN_SLEEP = 1  # Check every second for transitions
@@ -77,7 +77,6 @@ def calendar_poller_in_background():
         try:
             # 1. Check status and get the next scheduled transition time
             # Note: We rely on the cache expiration logic inside the poller.
-            # logic inside the poller.
             _, next_change_time = CALENDAR_MANAGER.check_status()
 
             sleep_time = DEFAULT_SLEEP
@@ -153,9 +152,22 @@ def get_dashboard_data_from_cache_or_poller():
 
     calendar_data_tuple = CALENDAR_MANAGER.check_status()
 
+    # Collect all possible text labels from config to help client scale fonts
+    all_possible_texts = set()
+    for cal_config in config.CALENDAR_CONFIGS:
+        for status_info in cal_config.get('statuses', {}).values():
+            text = status_info.get('text', '')
+            if text:
+                all_possible_texts.add(text)
+    
+    # Add ESO names too
+    all_possible_texts.add(config.ESO_CONFIG.get('NA_DISPLAY_NAME', 'PC-NA'))
+    all_possible_texts.add(config.ESO_CONFIG.get('EU_DISPLAY_NAME', 'PC-EU'))
+
     data = {
         "eso_status": ESO_STATUS_CACHE,
         "calendar_statuses": calendar_data_tuple[0],
+        "all_possible_texts": list(all_possible_texts)
     }
 
     data['eso_config'] = {
@@ -242,7 +254,6 @@ if __name__ == '__main__':
     eso_thread.start()
 
     # 2. START THE BACKGROUND POLLER THREAD for CALENDAR
-    # (NEW: event-driven updates)
     calendar_thread = threading.Thread(
         target=calendar_poller_in_background, daemon=True)
     calendar_thread.start()

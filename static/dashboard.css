@@ -1,105 +1,69 @@
 /* dashboard.css */
 
-/*
- * CORE LAYOUT STYLES (REQUIRED FOR HORIZONTAL ALIGNMENT AND RESIZING)
- */
 body {
-    /* Remove default margins and padding */
     margin: 0;
     padding: 0;
-    /* Ensure body takes up the full viewport height */
     height: 100vh;
     overflow: hidden;
-    /* Prevent scrollbars from showing */
     font-family: Arial, sans-serif;
-    /* Background color set to solid black for maximum contrast */
     background-color: #000;
 }
 
-.dashboard-container {
-    /* Use Flexbox to arrange items horizontally */
-    display: flex;
-    /* Distribute space evenly between and around the boxes */
-    justify-content: space-evenly;
-    /* Vertically center the items within the container */
-    align-items: center;
-    /* Ensure the container takes up the full height */
-    height: 100%;
-    padding: 0 10px;
-    /* Small padding on the sides */
-
-    /* BURN-IN FIX 5: Add transition for uniform vertical shifting */
-    transition: transform 0.3s ease-out;
+body.hide-cursor,
+body.hide-cursor * {
+    cursor: none !important;
 }
 
-/*
- * STATUS BOX STYLES (REQUIRED FOR ASPECT RATIO AND FONT SIZING)
- * These styles primarily govern Landscape mode and box fundamentals.
- */
+.dashboard-container {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100%;
+    padding: 0;
+    transition: transform 0.3s ease-out, opacity 0.5s ease-in;
+    opacity: 0;
+}
+
+.dashboard-container.visible {
+    opacity: 1;
+}
+
 .status-box {
-    /* CRITICAL: Allows boxes to grow/shrink equally and maintains responsiveness */
-    flex: 0 1 25%;
-    /* Set flex basis to optimize space on wide display */
-
-    /* UPDATED: Reduced margin for a subtler gap between circles */
+    flex: 0 0 var(--dynamic-circle-size, 25%);
     margin: 0 0.5%;
-
-    /* NEW: Use aspect-ratio to force the height to match the width (creating a circle) */
     aspect-ratio: 1 / 1;
-
-    /* Set max height relative to the viewport height to control size */
-    max-height: 90vh;
-
-    /* LANDSCAPE FIX: Prevent content from forcing the box to expand beyond its flex allocation */
     overflow: hidden;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
-    /* Visual styles */
-    /* Circle Shape: Set border-radius to 50% */
+    align-self: center;
     border-radius: 50%;
-    transition: all 0.3s ease;
     text-align: center;
     box-sizing: border-box;
-    /* Include padding/border in the element's total width/height */
-
-    /* BURN-IN FIX 2: Apply filter to slowly rotate the hue of the box background. (1-hour cycle) */
     animation: hue-shift-slow 3600s linear infinite;
-
-    /* IMPORTANT: Remove box-specific vertical transition to prevent conflicts */
     transition: all 0.3s ease;
+    width: var(--dynamic-circle-size, auto);
+    height: var(--dynamic-circle-size, auto);
 }
 
 .status-box h2 {
-    font-size: 5vw;
-    /* Font size relative to viewport width */
+    font-size: var(--dynamic-font-size, 5vw);
     margin: 0;
     padding: 0;
-    line-height: 1.1;
-
-    /* LANDSCAPE FIX: Force text onto one line and clip/show ellipsis if content overflows */
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    /* CRITICAL FIX: To force right-side clipping in Landscape, align text left 
-       and rely on the parent's centering to place the block correctly. */
-    text-align: left;
-    /* Max-width is set high (90%) to prevent clipping of non-overflowing text */
-    max-width: 90%;
-
-    /* BURN-IN FIX 3: Apply subtle animation to text luminance (60-second pulse) */
     animation: text-pulse 60s infinite alternate;
-    /* Add transition for text position from JS */
     transition: transform 0.1s linear;
 }
 
-/*
- * CORE COLOR AND UTILITY STYLES 
- */
 .status-red {
     background-color: #D80731;
     color: white;
@@ -145,14 +109,12 @@ body {
     color: white;
 }
 
-/* Clickable effect for calendar boxes */
 .clickable:hover {
     cursor: pointer;
     transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
-/* BURN-IN FIX 3: Keyframes for subtle text luminance pulse */
 @keyframes text-pulse {
     0% {
         filter: brightness(1.0);
@@ -162,13 +124,11 @@ body {
         filter: brightness(0.95);
     }
 
-    /* Subtle dimming */
     100% {
         filter: brightness(1.0);
     }
 }
 
-/* BURN-IN FIX 2: Keyframes for the 1-hour continuous hue shift */
 @keyframes hue-shift-slow {
     0% {
         filter: hue-rotate(0deg);
@@ -179,54 +139,57 @@ body {
     }
 }
 
-/* --- RESPONSIVENESS: Vertical Layout for Portrait/Taller Screens (FINAL WORKING BLOCK) --- */
 @media screen and (orientation: portrait) {
     .dashboard-container {
-        /* Layout and spacing */
         flex-direction: column;
-        /* CRITICAL FIX 1: Change to 'center' so we control the top/bottom space with padding */
         justify-content: center;
         align-items: center;
         height: 100vh;
-        /* CRITICAL FIX 2: Subtly reduced vertical padding (3.5vh) to buffer against the burn-in shift. */
         padding: 3.5vh 0;
     }
 
     .status-box {
-        /* CRITICAL FIX: Optimal box height that fits well in the constrained space */
-        height: 15vh;
-        /* Constrain width by the new height (15vh) to guarantee a circle shape */
-        width: min(90vw, 15vh);
-
+        width: var(--dynamic-circle-size, min(90vw, 15vh));
+        height: var(--dynamic-circle-size, 15vh);
         padding-top: 0;
-        /* FIX: Minimal margin for tight spacing between boxes (vertical padding handles top/bottom) */
         margin: 0.5vh 0;
-
         flex: 0 0 auto;
-
-        /* Centering text inside the box */
         display: flex;
         justify-content: center;
         align-items: center;
     }
 
     .status-box h2 {
-        /* Adjusted font size for 5-character labels in the 15vh box */
-        font-size: 3.8vh;
-
-        /* Max-width constraint that provides proper padding */
-        max-width: 13.5vh;
-
-        /* CRITICAL CLIPPING FIX: Explicitly set text-align: left for consistent right-side clipping */
-        text-align: left;
-
-        /* Ensure text stays on one line and use ellipsis for long text labels */
+        font-size: var(--dynamic-font-size, 3.8vh);
+        margin: 0;
+        padding: 0;
+        line-height: normal;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-
-        /* Override positioning */
-        position: static;
-        transform: none;
     }
+}
+
+/* Hardcoded hotspot for fullscreen toggle */
+#fullscreen-button {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 2000;
+    width: 12vmin;
+    height: 12vmin;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#fullscreen-button svg {
+    display: none;
 }

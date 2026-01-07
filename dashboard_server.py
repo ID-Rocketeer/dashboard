@@ -77,7 +77,6 @@ def calendar_poller_in_background():
         try:
             # 1. Check status and get the next scheduled transition time
             # Note: We rely on the cache expiration logic inside the poller.
-            # logic inside the poller.
             _, next_change_time = CALENDAR_MANAGER.check_status()
 
             sleep_time = DEFAULT_SLEEP

@@ -10,7 +10,6 @@ A responsive, real-time monitoring interface designed to provide a "single pane 
 * **Intelligent Calendar Caching:** Implements a "slow-poll" strategy for Google Calendar to prevent API rate-limiting, with a user-triggered override for instant updates.
 * **WebSocket Driven:** Uses WebSockets to push updates to client browsers immediately as they happen.
 * **Flexible Configuration:** Uses Python lists in `config.py` for straightforward data source management.
-* **Robust Security:** Supports multiple mechanisms to secure calendar credentials and passwords.
 
 ### 🖥️ Display & Hardware Optimization
 * **Aspect-Ratio Aware:** The client-side UI intelligently adapts its presentation based on the display's aspect ratio.

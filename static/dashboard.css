@@ -18,13 +18,13 @@ body.theme-dasher {
 
 @media screen and (orientation: landscape) {
     body.theme-dasher {
-        background-image: url('dasher-horizontal.svg');
+        background-image: url('dasher-horizontal-final.svg');
     }
 }
 
 @media screen and (orientation: portrait) {
     body.theme-dasher {
-        background-image: url('dasher-vertical.svg');
+        background-image: url('dasher-vertical-final.svg');
     }
 }
 

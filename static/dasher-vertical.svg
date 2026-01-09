@@ -1,15 +1,18 @@
 <!--?xml version="1.0" encoding="UTF-8"?-->
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="6200" viewBox="0 0 1024 6200">
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="5920" viewBox="0 0 1024 5920">
   <!-- Absolute black background -->
   <rect width="100%" height="100%" fill="#000000"></rect>
 
-  <!-- Vertically stacked, selectable text -->
-  <text x="50%" y="600" fill="rgb(12,12,12)" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="960" text-anchor="middle" dominant-baseline="central" style="user-select:text;">
-    <tspan x="50%" dy="0">D</tspan>
-    <tspan x="50%" dy="960">A</tspan>
-    <tspan x="50%" dy="960">S</tspan>
-    <tspan x="50%" dy="960">H</tspan>
-    <tspan x="50%" dy="960">E</tspan>
-    <tspan x="50%" dy="960">R</tspan>
-  </text>
+  <!-- Locked vertical layout: 920px spacing, centered -->
+  <text x="512" y="600" fill="rgb(12,12,12)" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="960" text-anchor="middle" dominant-baseline="central">D</text>
+
+  <text x="512" y="1520" fill="rgb(12,12,12)" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="960" text-anchor="middle" dominant-baseline="central">A</text>
+
+  <text x="512" y="2440" fill="rgb(12,12,12)" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="960" text-anchor="middle" dominant-baseline="central">S</text>
+
+  <text x="512" y="3360" fill="rgb(12,12,12)" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="960" text-anchor="middle" dominant-baseline="central">H</text>
+
+  <text x="512" y="4280" fill="rgb(12,12,12)" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="960" text-anchor="middle" dominant-baseline="central">E</text>
+
+  <text x="512" y="5200" fill="rgb(12,12,12)" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="960" text-anchor="middle" dominant-baseline="central">R</text>
 </svg>

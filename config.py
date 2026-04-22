@@ -17,6 +17,7 @@ CALENDAR_CONFIGS = [
         'calendar_id': 'primary',
         'name': 'Primary Calendar',
         'pending_minutes': 15,
+        'public': False,
         'statuses': {
             'FREE':    {'class': 'status-green',  'text': 'FREE'},
             'PENDING': {'class': 'status-yellow', 'text': 'SOON'},
@@ -29,6 +30,7 @@ CALENDAR_CONFIGS = [
         'calendar_id': '507igmu5ucighkk0et6je2oils@group.calendar.google.com',
         'name': 'ESO',
         'pending_minutes': 15,
+        'public': True,
         'statuses': {
             'FREE':    {'class': 'status-transparent', 'text': ''},
             'PENDING': {'class': 'status-yellow',      'text': 'ARM'},
@@ -42,6 +44,7 @@ CALENDAR_CONFIGS = [
         'name': 'Medical Appointments',
         'pending_minutes': 30,  # The SHORT window (30 minutes)
         'prepare_minutes': 60,  # The LONG window (60 minutes)
+        'public': False,
         'statuses': {
             'FREE':    {'class': 'status-transparent',  'text': ''},
             'PREPARE': {'class': 'status-blue', 'text': 'PREP'},

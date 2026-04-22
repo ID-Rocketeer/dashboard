@@ -18,22 +18,29 @@
         </div>
 
         {% for config in calendar_configs %}
-            {% set current_status = cache.calendar_statuses | selectattr('id', 'equalto', config.id) | first %}
-            
-            {% set status_word = current_status.status if current_status else 'N/A' %}
-            
-            {% set display_word = current_status.display_text if current_status and 'display_text' in current_status else status_word %}
-            
-            {% set css_class = current_status.css_class if current_status and 'css_class' in current_status else 'status-orange' %}
-            
-            {% set final_display_word = '' if css_class == 'medical-free' else display_word %}
-            
-            <div id="{{ config.id }}-calendar-box" 
-                 class="status-box {{ css_class }} clickable calendar-box" 
-                 data-calendar-id="{{ config.id }}">
+            {% set show_box = True %}
+            {% if is_tunnel and config.get('public') != True %}
+                {% set show_box = False %}
+            {% endif %}
+
+            {% if show_box %}
+                {% set current_status = cache.calendar_statuses | selectattr('id', 'equalto', config.id) | first %}
                 
-                <h2 id="{{ config.id }}-calendar-text">{{ final_display_word }}</h2>
-            </div>
+                {% set status_word = current_status.status if current_status else 'N/A' %}
+                
+                {% set display_word = current_status.display_text if current_status and 'display_text' in current_status else status_word %}
+                
+                {% set css_class = current_status.css_class if current_status and 'css_class' in current_status else 'status-orange' %}
+                
+                {% set final_display_word = '' if css_class == 'medical-free' else display_word %}
+                
+                <div id="{{ config.id }}-calendar-box" 
+                     class="status-box {{ css_class }} clickable calendar-box" 
+                     data-calendar-id="{{ config.id }}">
+                    
+                    <h2 id="{{ config.id }}-calendar-text">{{ final_display_word }}</h2>
+                </div>
+            {% endif %}
         {% endfor %}
         
     </div>

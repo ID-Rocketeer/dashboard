@@ -185,9 +185,11 @@ def get_dashboard_data_from_cache_or_poller():
 def main_dashboard():
     """Main dashboard route to render the HTML template."""
     cache_data = get_dashboard_data_from_cache_or_poller()
+    is_tunnel = 'CF-Ray' in request.headers
     return render_template('dashboard.html',
                            cache=cache_data,
-                           calendar_configs=config.CALENDAR_CONFIGS)
+                           calendar_configs=config.CALENDAR_CONFIGS,
+                           is_tunnel=is_tunnel)
 
 
 @app.route("/api/status")

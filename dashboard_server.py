@@ -20,8 +20,8 @@ CALENDAR_MANAGER = CalendarManager(config.CALENDAR_CONFIGS)
 
 # --- GLOBAL CACHE AND RATE LIMITING ---
 ESO_STATUS_CACHE = {
-    "PC NA": "N/A",
-    "PC EU": "N/A",
+    "NA": "N/A",
+    "EU": "N/A",
 }
 
 # Global variable to track the last manual refresh time

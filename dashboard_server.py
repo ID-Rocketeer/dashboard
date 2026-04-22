@@ -2,7 +2,7 @@ import os
 import time
 import threading
 from datetime import datetime
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, make_response, redirect, url_for
 from flask_socketio import SocketIO, join_room
 import config
 from calendar_manager import CalendarManager
@@ -190,6 +190,20 @@ def get_dashboard_data_from_cache_or_poller(is_tunnel=False):
     return data
 
 
+def is_restricted_tunnel():
+    """Returns True if the connection is coming through the Cloudflare tunnel 
+       AND does NOT possess a valid device authorization cookie."""
+    if 'CF-Ray' not in request.headers:
+        return False  # Direct local network connection
+        
+    cookie_token = request.cookies.get('device_auth')
+    expected_token = os.environ.get('DEVICE_TOKEN')
+    if cookie_token and expected_token and cookie_token == expected_token:
+        return False  # Authorized personal device connecting via tunnel!
+        
+    return True # Unrecognized stranger on the tunnel connection
+
+
 # --- ROUTES ---
 
 
@@ -201,10 +215,24 @@ def log_tunnel_requests():
         print(f"[TUNNEL] {request.method} {request.path} - Origin IP: {client_ip}", flush=True)
 
 
+@app.route("/auth")
+def authenticate_device():
+    provided_token = request.args.get('token')
+    expected_token = os.environ.get('DEVICE_TOKEN')
+    
+    if expected_token and provided_token == expected_token:
+        response = make_response(redirect(url_for('main_dashboard')))
+        # Set a 10-year persistent HTTP cookie securely
+        response.set_cookie('device_auth', provided_token, max_age=315360000, httponly=True)
+        return response
+        
+    return "Invalid or missing token", 403
+
+
 @app.route("/")
 def main_dashboard():
     """Main dashboard route to render the HTML template."""
-    is_tunnel = 'CF-Ray' in request.headers
+    is_tunnel = is_restricted_tunnel()
     cache_data = get_dashboard_data_from_cache_or_poller(is_tunnel=is_tunnel)
     return render_template('dashboard.html',
                            cache=cache_data,
@@ -215,7 +243,7 @@ def main_dashboard():
 @app.route("/api/status")
 def api_status():
     """API endpoint for dashboard.js to fetch status updates."""
-    is_tunnel = 'CF-Ray' in request.headers
+    is_tunnel = is_restricted_tunnel()
     data = get_dashboard_data_from_cache_or_poller(is_tunnel=is_tunnel)
     return jsonify(data)
 
@@ -263,13 +291,14 @@ def api_refresh_calendar():
 
 @socketio.on('connect')
 def handle_connect():
-    is_tunnel = 'CF-Ray' in request.headers
+    is_tunnel = is_restricted_tunnel()
     room = 'tunnel_clients' if is_tunnel else 'local_clients'
     join_room(room)
     
-    if is_tunnel:
+    if 'CF-Ray' in request.headers:
         client_ip = request.headers.get('CF-Connecting-IP', request.remote_addr)
-        print(f'[TUNNEL] WebSocket Connected - Origin IP: {client_ip}', flush=True)
+        auth_status = "Unauthorized" if is_tunnel else "Authorized"
+        print(f'[TUNNEL] WebSocket Connected ({auth_status}) - Origin IP: {client_ip}', flush=True)
     else:
         print(f'Client locally connected: {request.sid}', flush=True)
 

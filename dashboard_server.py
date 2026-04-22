@@ -3,7 +3,7 @@ import time
 import threading
 from datetime import datetime
 from flask import Flask, render_template, jsonify, request
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room
 import config
 from calendar_manager import CalendarManager
 import eso_status_poller
@@ -54,8 +54,7 @@ def update_eso_status_in_background():
             print("ESO Status Cache Updated:", ESO_STATUS_CACHE)
 
             # Note: This ESO thread still triggers a full update every 60s
-            socketio.emit(
-                'status_update', get_dashboard_data_from_cache_or_poller())
+            broadcast_status_update()
 
         except Exception as e:
             print(f"ERROR during ESO status polling: {e}")
@@ -132,8 +131,7 @@ def calendar_poller_in_background():
             CALENDAR_MANAGER.check_status(force_fetch=False)
 
             print("CALENDAR WORKER: Pushing update.")
-            socketio.emit(
-                'status_update', get_dashboard_data_from_cache_or_poller())
+            broadcast_status_update()
 
         except Exception as e:
             print(f"ERROR during Calendar Poller worker: {e}")
@@ -144,13 +142,27 @@ def calendar_poller_in_background():
 # --- DATA RETRIEVAL ---
 
 
-def get_dashboard_data_from_cache_or_poller():
+def broadcast_status_update():
+    """Helper to emit stripped down data to tunnel clients and full data to local clients."""
+    local_data = get_dashboard_data_from_cache_or_poller(is_tunnel=False)
+    socketio.emit('status_update', local_data, to='local_clients')
+    
+    tunnel_data = get_dashboard_data_from_cache_or_poller(is_tunnel=True)
+    socketio.emit('status_update', tunnel_data, to='tunnel_clients')
+
+
+def get_dashboard_data_from_cache_or_poller(is_tunnel=False):
     """
     Retrieves the latest status data and prepares the final structure
-    for client-side use.
+    for client-side use. Filters out non-public calendars if is_tunnel=True.
     """
 
     calendar_data_tuple = CALENDAR_MANAGER.check_status()
+    calendar_statuses = calendar_data_tuple[0]
+
+    if is_tunnel:
+        public_ids = [c['id'] for c in config.CALENDAR_CONFIGS if c.get('public') == True]
+        calendar_statuses = [s for s in calendar_statuses if s['id'] in public_ids]
 
     # Collect all possible text labels from config to help client scale fonts
     all_possible_texts = set()
@@ -166,7 +178,7 @@ def get_dashboard_data_from_cache_or_poller():
 
     data = {
         "eso_status": ESO_STATUS_CACHE,
-        "calendar_statuses": calendar_data_tuple[0],
+        "calendar_statuses": calendar_statuses,
         "all_possible_texts": list(all_possible_texts)
     }
 
@@ -184,8 +196,8 @@ def get_dashboard_data_from_cache_or_poller():
 @app.route("/")
 def main_dashboard():
     """Main dashboard route to render the HTML template."""
-    cache_data = get_dashboard_data_from_cache_or_poller()
     is_tunnel = 'CF-Ray' in request.headers
+    cache_data = get_dashboard_data_from_cache_or_poller(is_tunnel=is_tunnel)
     return render_template('dashboard.html',
                            cache=cache_data,
                            calendar_configs=config.CALENDAR_CONFIGS,
@@ -195,7 +207,8 @@ def main_dashboard():
 @app.route("/api/status")
 def api_status():
     """API endpoint for dashboard.js to fetch status updates."""
-    data = get_dashboard_data_from_cache_or_poller()
+    is_tunnel = 'CF-Ray' in request.headers
+    data = get_dashboard_data_from_cache_or_poller(is_tunnel=is_tunnel)
     return jsonify(data)
 
 
@@ -225,7 +238,7 @@ def api_refresh_calendar():
     CALENDAR_MANAGER.check_status(force_fetch=True)
 
     # Notify all clients to fetch the newly updated cache data
-    socketio.emit('status_update', get_dashboard_data_from_cache_or_poller())
+    broadcast_status_update()
 
     # Wake up the background thread so it can immediately re-schedule based
     # on new data
@@ -242,8 +255,12 @@ def api_refresh_calendar():
 
 @socketio.on('connect')
 def handle_connect():
-    print('Client connected:', request.sid)
-    socketio.emit('status_update', get_dashboard_data_from_cache_or_poller())
+    is_tunnel = 'CF-Ray' in request.headers
+    room = 'tunnel_clients' if is_tunnel else 'local_clients'
+    join_room(room)
+    
+    print(f'Client connected: {request.sid} [Tunnel: {is_tunnel}]')
+    socketio.emit('status_update', get_dashboard_data_from_cache_or_poller(is_tunnel=is_tunnel), to=request.sid)
 
 
 # --- MAIN RUN BLOCK ---

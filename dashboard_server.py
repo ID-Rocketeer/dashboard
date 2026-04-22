@@ -193,6 +193,14 @@ def get_dashboard_data_from_cache_or_poller(is_tunnel=False):
 # --- ROUTES ---
 
 
+@app.before_request
+def log_tunnel_requests():
+    """Logs incoming requests via Cloudflare Tunnel to the system journal."""
+    if 'CF-Ray' in request.headers:
+        client_ip = request.headers.get('CF-Connecting-IP', request.remote_addr)
+        print(f"[TUNNEL] {request.method} {request.path} - Origin IP: {client_ip}", flush=True)
+
+
 @app.route("/")
 def main_dashboard():
     """Main dashboard route to render the HTML template."""
@@ -259,7 +267,12 @@ def handle_connect():
     room = 'tunnel_clients' if is_tunnel else 'local_clients'
     join_room(room)
     
-    print(f'Client connected: {request.sid} [Tunnel: {is_tunnel}]')
+    if is_tunnel:
+        client_ip = request.headers.get('CF-Connecting-IP', request.remote_addr)
+        print(f'[TUNNEL] WebSocket Connected - Origin IP: {client_ip}', flush=True)
+    else:
+        print(f'Client locally connected: {request.sid}', flush=True)
+
     socketio.emit('status_update', get_dashboard_data_from_cache_or_poller(is_tunnel=is_tunnel), to=request.sid)
 
 
